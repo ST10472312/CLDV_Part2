@@ -1,0 +1,44 @@
+
+services:
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite:latest
+    container_name: coffeenchill-azurite
+    command: >
+      azurite
+      --blobHost 0.0.0.0
+      --queueHost 0.0.0.0
+      --tableHost 0.0.0.0
+      --location /data
+      --debug /data/debug.log
+    ports:
+      - "10000:10000"
+      - "10001:10001"
+      - "10002:10002"
+    volumes:
+      - azurite-data:/data
+    networks:
+      - coffeenchill-net
+
+  functions:
+    build:
+      context: ./CoffeeNChillFunctions
+      dockerfile: Dockerfile
+    image: coffeenchill-functions:v2.0
+    container_name: coffeenchill-functions
+    depends_on:
+      - azurite
+    environment:
+      AzureWebJobsStorage: "UseDevelopmentStorage=true"
+      FUNCTIONS_WORKER_RUNTIME: "dotnet-isolated"
+      AzureFunctionsJobHost__Logging__Console__IsEnabled: "true"
+    ports:
+      - "7071:80"
+    networks:
+      - coffeenchill-net
+
+networks:
+  coffeenchill-net:
+    driver: bridge
+
+volumes:
+  azurite-data:
