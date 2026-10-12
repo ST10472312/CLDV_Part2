@@ -646,6 +646,10 @@
   ],
   "variable": [
     {
+      "key": "baseUrl",
+      "value": "http://localhost:7071/api"
+    },
+    {
       "key": "statusOrderId",
       "value": ""
     },
