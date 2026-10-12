@@ -1,0 +1,15 @@
+$kind: http-request
+url: "{{baseUrl}}/api/menu/Hot%20Drinks/ZZZ-997"
+method: DELETE
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 404 Not Found", function () {
+          pm.response.to.have.status(404);
+      });
+
+      pm.test("Says the item was not found", function () {
+          pm.expect(pm.response.text()).to.match(/not found/i);
+      });
+    language: text/javascript
+order: 6000

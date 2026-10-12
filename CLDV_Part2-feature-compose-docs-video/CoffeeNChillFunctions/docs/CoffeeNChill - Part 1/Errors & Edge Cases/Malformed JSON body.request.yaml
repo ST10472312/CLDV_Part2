@@ -1,0 +1,20 @@
+$kind: http-request
+url: "{{baseUrl}}/api/menu"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: '{ "price": }'
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("The malformed body is rejected", function () {
+          pm.expect(pm.response.code).to.be.at.least(400);
+      });
+
+      pm.test("Nothing is created", function () {
+          pm.expect(pm.response.code).to.not.eql(201);
+      });
+    language: text/javascript
+order: 4000

@@ -1,0 +1,26 @@
+$kind: http-request
+url: "{{baseUrl}}/api/menu/category/Hot%20Drinks"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200 OK", function () {
+          pm.response.to.have.status(200);
+      });
+
+      pm.test("Returns only items in the requested partition", function () {
+          const items = pm.response.json();
+          pm.expect(items).to.be.an("array");
+          items.forEach(function (item) {
+              pm.expect(item.PartitionKey).to.eql("Hot Drinks");
+          });
+      });
+
+      pm.test("Includes the item created by this run", function () {
+          const keys = pm.response.json().map(function (item) {
+              return item.RowKey;
+          });
+          pm.expect(keys).to.include(pm.collectionVariables.get("createdRowKey"));
+      });
+    language: text/javascript
+order: 6000

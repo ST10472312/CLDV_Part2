@@ -1,0 +1,28 @@
+$kind: http-request
+url: "{{baseUrl}}/api/documents/download/{{uploadedFileName}}"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      // Code attribution
+      // Asserting on a named response header through pm.response.headers.get()
+      // follows the header assertion example published in:
+      // Postman, 2026a. Test examples in Postman. [Online]
+      // Available at: https://learning.postman.com/docs/tests-and-scripts/
+      //   write-scripts/test-examples/
+      // [Accessed 14 September 2026].
+
+      pm.test("Status code is 200 OK", function () {
+          pm.response.to.have.status(200);
+      });
+
+      pm.test("Returns the file as an attachment", function () {
+          pm.expect(pm.response.headers.get("Content-Disposition"))
+              .to.include(pm.collectionVariables.get("uploadedFileName"));
+      });
+
+      pm.test("Body is not empty", function () {
+          pm.expect(pm.response.responseSize).to.be.above(0);
+      });
+    language: text/javascript
+order: 6000

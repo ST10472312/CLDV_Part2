@@ -1,0 +1,34 @@
+$kind: http-request
+url: "{{baseUrl}}/api/menu/{{createdCategoryEncoded}}/{{createdRowKey}}"
+method: PUT
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "name": "Espresso",
+      "description": "Double shot, single origin.",
+      "price": 26.5,
+      "isAvailable": false
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200 OK", function () {
+          pm.response.to.have.status(200);
+      });
+
+      pm.test("Returns the new values", function () {
+          const body = pm.response.json();
+          pm.expect(body.Price).to.eql(26.5);
+          pm.expect(body.IsAvailable).to.be.false;
+      });
+
+      pm.test("Leaves the identifiers unchanged", function () {
+          const body = pm.response.json();
+          pm.expect(body.RowKey).to.eql(pm.collectionVariables.get("createdRowKey"));
+          pm.expect(body.PartitionKey).to.eql(pm.collectionVariables.get("createdCategory"));
+      });
+    language: text/javascript
+order: 8000

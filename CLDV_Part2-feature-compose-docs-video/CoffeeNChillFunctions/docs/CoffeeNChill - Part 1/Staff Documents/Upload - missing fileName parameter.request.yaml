@@ -1,0 +1,21 @@
+$kind: http-request
+url: "{{baseUrl}}/api/documents/upload"
+method: POST
+headers:
+  Content-Type: application/pdf
+body:
+  type: file
+  content:
+    src: docs/test-files/barista-recipe-sheet.pdf
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 400 Bad Request", function () {
+          pm.response.to.have.status(400);
+      });
+
+      pm.test("Names the missing parameter", function () {
+          pm.expect(pm.response.text()).to.match(/fileName/i);
+      });
+    language: text/javascript
+order: 2000
