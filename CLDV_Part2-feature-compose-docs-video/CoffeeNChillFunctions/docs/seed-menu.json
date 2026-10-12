@@ -1,0 +1,11 @@
+[
+  { "partitionKey": "Hot Drinks",  "rowKey": "COF-002", "name": "Cappuccino",               "description": "Double shot with steamed milk and cocoa.",  "price": 32.50, "isAvailable": true },
+  { "partitionKey": "Hot Drinks",  "rowKey": "COF-003", "name": "Flat White",               "description": "Double ristretto, microfoam.",              "price": 34.00, "isAvailable": true },
+  { "partitionKey": "Hot Drinks",  "rowKey": "TEA-011", "name": "Rooibos Tea",              "description": "Loose leaf, served with honey on request.", "price": 18.00, "isAvailable": true },
+  { "partitionKey": "Cold Drinks", "rowKey": "ICE-201", "name": "Iced Latte",               "description": "Double shot over ice with cold milk.",      "price": 36.00, "isAvailable": true },
+  { "partitionKey": "Cold Drinks", "rowKey": "ICE-202", "name": "Sparkling Water",          "description": "330ml bottle, chilled.",                    "price": 15.00, "isAvailable": true },
+  { "partitionKey": "Cold Drinks", "rowKey": "JUI-301", "name": "Orange Juice",             "description": "Freshly squeezed each morning.",            "price": 26.00, "isAvailable": false },
+  { "partitionKey": "Pastries",    "rowKey": "PAS-104", "name": "Ham and Cheese Croissant", "description": "All-butter croissant, baked each morning.", "price": 45.00, "isAvailable": true },
+  { "partitionKey": "Pastries",    "rowKey": "PAS-107", "name": "Chocolate Muffin",         "description": "Dark chocolate chunks.",                    "price": 28.00, "isAvailable": false },
+  { "partitionKey": "Pastries",    "rowKey": "PAS-112", "name": "Cinnamon Danish",          "description": "Glazed, with a cinnamon swirl.",            "price": 30.00, "isAvailable": true }
+]

@@ -1,0 +1,62 @@
+services:
+  azurite:
+    image: st10450884/coffeenchill-azurite:v2.0
+    container_name: coffeenchill-azurite
+    command: >
+      azurite
+      --blobHost 0.0.0.0
+      --queueHost 0.0.0.0
+      --tableHost 0.0.0.0
+      --location /data
+      --debug /data/debug.log
+    ports:
+      - "10000:10000"
+      - "10001:10001"
+      - "10002:10002"
+    volumes:
+      - azurite-data:/data
+    networks:
+      - coffeenchill-net
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - >-
+          const net = require('net');
+          const ports = [10000, 10001, 10002];
+          Promise.all(ports.map(port => new Promise((resolve, reject) => {
+          const socket = net.connect(port, '127.0.0.1', () => {
+          socket.destroy();
+          resolve();
+          });
+          socket.on('error', reject);
+          }))).then(() => process.exit(0)).catch(() => process.exit(1));
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 5s
+
+  functions:
+    image: st10450884/coffeenchill-functions:v2.0
+    container_name: coffeenchill-functions
+    depends_on:
+      azurite:
+        condition: service_healthy
+    environment:
+      AzureWebJobsStorage: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;QueueEndpoint=http://azurite:10001/devstoreaccount1;TableEndpoint=http://azurite:10002/devstoreaccount1;"
+      AzureWebStorage: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;QueueEndpoint=http://azurite:10001/devstoreaccount1;TableEndpoint=http://azurite:10002/devstoreaccount1;"
+      StaffDocsContainerName: "staffdocs"
+      FUNCTIONS_WORKER_RUNTIME: "dotnet-isolated"
+      AzureFunctionsJobHost__Logging__Console__IsEnabled: "true"
+    ports:
+      - "7071:80"
+    networks:
+      - coffeenchill-net
+
+networks:
+  coffeenchill-net:
+    driver: bridge
+
+volumes:
+  azurite-data:

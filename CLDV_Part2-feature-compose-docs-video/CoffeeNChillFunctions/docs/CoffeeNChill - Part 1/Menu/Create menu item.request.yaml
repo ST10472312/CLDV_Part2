@@ -1,0 +1,69 @@
+$kind: http-request
+url: "{{baseUrl}}/api/menu"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "partitionKey": "Hot Drinks",
+      "rowKey": "COF-001",
+      "name": "Espresso",
+      "description": "Double shot, single origin.",
+      "price": 22,
+      "isAvailable": true
+    }
+scripts:
+  - type: beforeRequest
+    code: |-
+      // Code attribution
+      // Sending a clean-up request from a pre-request script, and reading the
+      // outcome through the (error, response) callback, follows the example in:
+      // Postman, 2026c. Use scripts to send requests in Postman. [Online]
+      // Available at: https://learning.postman.com/docs/tests-and-scripts/
+      //   write-scripts/postman-sandbox-reference/pm-send-request/
+      // [Accessed 14 September 2026].
+
+      const cleanup = {
+          url: pm.environment.get("baseUrl") + "/api/menu/Hot%20Drinks/COF-001",
+          method: "DELETE"
+      };
+
+      pm.sendRequest(cleanup, function (error) {
+          if (error) {
+              console.log("Clean-up could not reach the API: " + error);
+          }
+      });
+    language: text/javascript
+  - type: afterResponse
+    code: |-
+      // Code attribution
+      // Persisting a value from one response so later requests can read it with
+      // {{createdRowKey}} follows the collection variable usage documented in:
+      // Postman, 2026b. Store and reuse values using variables. [Online]
+      // Available at: https://learning.postman.com/docs/sending-requests/variables/variables/
+      // [Accessed 14 September 2026].
+
+      pm.test("Status code is 201 Created", function () {
+          pm.response.to.have.status(201);
+      });
+
+      pm.test("Returns the stored item", function () {
+          const body = pm.response.json();
+          pm.expect(body.PartitionKey).to.eql("Hot Drinks");
+          pm.expect(body.RowKey).to.eql("COF-001");
+          pm.expect(body.Name).to.eql("Espresso");
+          pm.expect(body.Price).to.eql(22);
+          pm.expect(body.IsAvailable).to.be.true;
+      });
+
+      pm.test("Saves the identifiers for the later requests", function () {
+          const body = pm.response.json();
+          pm.collectionVariables.set("createdCategory", body.PartitionKey);
+          pm.collectionVariables.set("createdRowKey", body.RowKey);
+          pm.collectionVariables.set("createdCategoryEncoded", encodeURIComponent(body.PartitionKey));
+          pm.expect(pm.collectionVariables.get("createdRowKey")).to.eql("COF-001");
+      });
+    language: text/javascript
+order: 1000

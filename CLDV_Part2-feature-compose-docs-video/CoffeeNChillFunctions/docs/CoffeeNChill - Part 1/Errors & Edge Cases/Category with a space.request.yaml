@@ -1,0 +1,20 @@
+$kind: http-request
+url: "{{baseUrl}}/api/menu/category/Hot%20Drinks"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("The encoded space resolved to a real route", function () {
+          pm.response.to.have.status(200);
+          pm.expect(pm.response.code).to.not.eql(404);
+      });
+
+      pm.test("The category was matched exactly, spaces included", function () {
+          const items = pm.response.json();
+          pm.expect(items).to.be.an("array");
+          items.forEach(function (item) {
+              pm.expect(item.PartitionKey).to.eql("Hot Drinks");
+          });
+      });
+    language: text/javascript
+order: 3000

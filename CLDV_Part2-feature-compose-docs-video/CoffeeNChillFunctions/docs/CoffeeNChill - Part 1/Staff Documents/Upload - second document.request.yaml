@@ -1,0 +1,23 @@
+$kind: http-request
+url: "{{baseUrl}}/api/documents/upload?fileName=equipment-cleaning-manual.pdf"
+method: POST
+headers:
+  Content-Type: application/pdf
+queryParams:
+  fileName: equipment-cleaning-manual.pdf
+body:
+  type: file
+  content:
+    src: docs/test-files/equipment-cleaning-manual.pdf
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 201 Created", function () {
+          pm.response.to.have.status(201);
+      });
+
+      pm.test("Confirms the stored file name", function () {
+          pm.expect(pm.response.text()).to.include("equipment-cleaning-manual.pdf");
+      });
+    language: text/javascript
+order: 4000

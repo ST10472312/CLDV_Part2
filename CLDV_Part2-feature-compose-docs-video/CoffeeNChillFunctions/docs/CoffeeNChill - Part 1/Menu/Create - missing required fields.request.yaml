@@ -1,0 +1,28 @@
+$kind: http-request
+url: "{{baseUrl}}/api/menu"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "partitionKey": "Hot Drinks",
+      "rowKey": "COF-903",
+      "name": "",
+      "description": "Name deliberately omitted.",
+      "price": 20,
+      "isAvailable": true
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 400 Bad Request", function () {
+          pm.response.to.have.status(400);
+      });
+
+      pm.test("Explains which fields are required", function () {
+          pm.expect(pm.response.text()).to.match(/required/i);
+      });
+    language: text/javascript
+order: 2000

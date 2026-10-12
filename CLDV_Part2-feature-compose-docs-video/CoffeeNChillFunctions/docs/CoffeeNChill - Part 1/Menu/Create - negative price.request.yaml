@@ -1,0 +1,28 @@
+$kind: http-request
+url: "{{baseUrl}}/api/menu"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "partitionKey": "Hot Drinks",
+      "rowKey": "COF-902",
+      "name": "Impossible Americano",
+      "description": "Priced below zero.",
+      "price": -5,
+      "isAvailable": true
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Rejects a negative price with 400", function () {
+          pm.response.to.have.status(400);
+      });
+
+      pm.test("Names the field at fault", function () {
+          pm.expect(pm.response.text()).to.match(/price/i);
+      });
+    language: text/javascript
+order: 3000

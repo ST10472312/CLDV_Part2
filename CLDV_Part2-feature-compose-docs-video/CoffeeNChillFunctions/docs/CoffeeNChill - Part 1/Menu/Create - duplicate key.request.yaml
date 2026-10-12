@@ -1,0 +1,28 @@
+$kind: http-request
+url: "{{baseUrl}}/api/menu"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "partitionKey": "Hot Drinks",
+      "rowKey": "COF-001",
+      "name": "Espresso",
+      "description": "Double shot, single origin.",
+      "price": 22,
+      "isAvailable": true
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("The duplicate is rejected", function () {
+          pm.expect(pm.response.code).to.be.at.least(400);
+      });
+
+      pm.test("A second item is not created", function () {
+          pm.expect(pm.response.code).to.not.eql(201);
+      });
+    language: text/javascript
+order: 4000
