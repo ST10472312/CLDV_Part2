@@ -1,7 +1,6 @@
 {
   "IsEncrypted": false,
-  "Values": {
-    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+  "Values": {,
     "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
     "STATUS_DELAY_SECONDS": "8",
     "ENABLE_POISON_TEST": "true"
