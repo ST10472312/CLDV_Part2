@@ -1,3 +1,4 @@
+using Azure.Data.Tables;
 using Azure.Storage.Queues;
 using Azure.Monitor.OpenTelemetry.Exporter;
 using Microsoft.Azure.Functions.Worker;
@@ -24,6 +25,9 @@ builder.Services.AddSingleton(new QueueServiceClient(
     storageConnection,
     new QueueClientOptions { MessageEncoding = QueueMessageEncoding.Base64 }));
 builder.Services.AddSingleton<IOrderQueueService, OrderQueueService>();
+
+builder.Services.AddSingleton(new TableServiceClient(storageConnection));
+builder.Services.AddSingleton<IOrderTableService, OrderTableService>();
 
 if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("APPLICATIONINSIGHTS_CONNECTION_STRING")))
 {
