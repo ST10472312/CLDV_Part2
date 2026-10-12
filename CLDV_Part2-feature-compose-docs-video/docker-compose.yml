@@ -1,9 +1,6 @@
 services:
   azurite:
-    image: coffeenchill-azurite:v2.0
-    build:
-      context: .
-      dockerfile: Dockerfile.azurite
+    image: st10450884/coffeenchill-azurite:v2.0
     container_name: coffeenchill-azurite
     command: >
       azurite
@@ -41,18 +38,15 @@ services:
       start_period: 5s
 
   functions:
-    build:
-      context: ./CoffeeNChillFunctions
-      dockerfile: Dockerfile
-    image: coffeenchill-functions:v2.0
+    image: st10450884/coffeenchill-functions:v2.0
     container_name: coffeenchill-functions
     depends_on:
       azurite:
         condition: service_healthy
     environment:
-      AzureWebJobsStorage: 'DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;QueueEndpoint=http://azurite:10001/devstoreaccount1;TableEndpoint=http://azurite:10002/devstoreaccount1;'
-      AzureWebStorage: 'DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;QueueEndpoint=http://azurite:10001/devstoreaccount1;TableEndpoint=http://azurite:10002/devstoreaccount1;'
-      StaffDocsContainerName: 'staffdocs'
+      AzureWebJobsStorage: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;QueueEndpoint=http://azurite:10001/devstoreaccount1;TableEndpoint=http://azurite:10002/devstoreaccount1;"
+      AzureWebStorage: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;QueueEndpoint=http://azurite:10001/devstoreaccount1;TableEndpoint=http://azurite:10002/devstoreaccount1;"
+      StaffDocsContainerName: "staffdocs"
       FUNCTIONS_WORKER_RUNTIME: "dotnet-isolated"
       AzureFunctionsJobHost__Logging__Console__IsEnabled: "true"
     ports:
