@@ -44,27 +44,41 @@ and the poison queue.
 
 ```bash
 newman run docs/wip/member2_orders_processing.postman_collection.json \
-  -e docs/wip/member2_orders.postman_environment.json
+
 
 ## Member 3 — Docker Compose, Docker Hub & Documentation
 
-### Docker Compose
+### Docker Compose Configuration
 
-The project uses `docker-compose.yml` to run the CoffeeNChill application services together. The configuration uses Docker Hub images for the Azure Functions application and Azurite storage emulator, connected through a Docker bridge network with persistent storage configured for the required data.
+The project uses `docker-compose.yml` to run the CoffeeNChill Azure Functions application and Azurite storage emulator together. Docker Compose connects both services through a dedicated bridge network, allowing the Functions application to communicate with Azurite using the service hostname. A named Docker volume is configured to persist Azurite data.
 
-Start the services from the repository root:
+The configuration was validated successfully using:
+
+```bash
+docker compose config
+```
+
+### Running the Application
+
+The application can be started from the repository root using:
 
 ```bash
 docker compose up -d
 ```
 
-Check the running containers:
+The running containers can be checked using:
 
 ```bash
 docker compose ps
 ```
 
-Stop the services:
+To view the Azure Functions application logs:
+
+```bash
+docker logs coffeenchill-functions --tail 100
+```
+
+To stop the services, run:
 
 ```bash
 docker compose down
@@ -72,27 +86,27 @@ docker compose down
 
 ### Docker Hub Images
 
-The project images are published to Docker Hub:
+The project uses the following Docker Hub images:
 
-- **Functions image:** `coffeenchill-functions`
-- **Azurite image:** `coffeenchill-azurite`
+- **Azure Functions:** `st10450884/coffeenchill-functions:v2.0`
+- **Azurite storage emulator:** `st10450884/coffeenchill-azurite:v2.0`
 
-The repositories include version tags `v1.0` and `v2.0` for the relevant images.
+The Docker Compose configuration references these images to run the application services. The project also maintains the `v1.0` and `v2.0` image versions where applicable.
 
-### Verification
+### Verification and Testing
 
-The Docker Compose configuration was checked using:
+The Docker Compose configuration was validated successfully, and both containers started successfully.
 
-```bash
-docker compose config --quiet
-```
+The following results were verified:
 
-The services were started and checked for healthy operation. The Postman tests were also run to verify the API functionality.
+- The Azurite container started and reported a healthy status.
+- The CoffeeNChill Functions container started and remained running.
+- The Functions host loaded nine functions: `CreateMenuItem`, `DeleteMenuItem`, `DownloadStaffDocument`, `GetAllMenuItems`, `GetMenuItemsByCategory`, `ListStaffDocuments`, `QueueOrder`, `UpdateMenuItem` and `UploadStaffDocument`.
+- The application exposed its HTTP endpoints through port `7071`.
+- The available API endpoints were identified from the Functions host logs for testing through Postman.
 
-### Contribution
+### Member 3 Contribution
 
-Member 3 was responsible for the Docker Compose configuration, Docker Hub image publishing and versioning, and supporting project documentation for deployment and execution.
-```
+Member 3 was responsible for configuring Docker Compose, integrating the Azure Functions application with the Azurite storage emulator, configuring the Docker network and persistent storage, publishing and versioning the Docker Hub images, verifying container startup and documenting the deployment and execution procedures.
+  -e docs/wip/member2_orders.postman_environment.json
 
-The run takes about 50 seconds: two requests wait for the simulated lifecycle and for
-the three queue retries.
