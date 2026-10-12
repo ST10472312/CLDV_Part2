@@ -1,0 +1,23 @@
+$kind: http-request
+url: "{{baseUrl}}/api/documents/upload?fileName=not-allowed.exe"
+method: POST
+headers:
+  Content-Type: application/pdf
+queryParams:
+  fileName: not-allowed.exe
+body:
+  type: file
+  content:
+    src: docs/test-files/not-allowed.exe
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 400 Bad Request", function () {
+          pm.response.to.have.status(400);
+      });
+
+      pm.test("Explains which types are allowed", function () {
+          pm.expect(pm.response.text()).to.match(/allowed|pdf|doc|txt/i);
+      });
+    language: text/javascript
+order: 3000

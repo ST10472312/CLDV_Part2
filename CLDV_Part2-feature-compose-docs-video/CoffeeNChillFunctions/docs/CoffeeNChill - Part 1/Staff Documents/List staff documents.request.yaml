@@ -1,0 +1,36 @@
+$kind: http-request
+url: "{{baseUrl}}/api/documents"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      // Code attribution
+      // The chained type-and-emptiness assertion used here
+      // - expect(target).to.be.an('array').that.is.not.empty -
+      // is the BDD chaining form documented in:
+      // Chai, 2026. Expect / Should. Chai Assertion Library. [Online]
+      // Available at: https://www.chaijs.com/api/bdd/
+      // [Accessed 14 September 2026].
+
+      pm.test("Status code is 200 OK", function () {
+          pm.response.to.have.status(200);
+      });
+
+      pm.test("Each document reports name, size and last modified", function () {
+          const docs = pm.response.json();
+          pm.expect(docs).to.be.an("array").that.is.not.empty;
+          docs.forEach(function (document) {
+              pm.expect(document).to.have.property("FileName");
+              pm.expect(document.Size).to.be.a("number").above(0);
+              pm.expect(document).to.have.property("LastModified");
+          });
+      });
+
+      pm.test("Includes the file uploaded by this run", function () {
+          const names = pm.response.json().map(function (document) {
+              return document.FileName;
+          });
+          pm.expect(names).to.include(pm.collectionVariables.get("uploadedFileName"));
+      });
+    language: text/javascript
+order: 5000

@@ -1,0 +1,15 @@
+$kind: http-request
+url: "{{baseUrl}}/api/menu/{{createdCategoryEncoded}}/{{createdRowKey}}"
+method: DELETE
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("The item is deleted", function () {
+          pm.response.to.have.status(200);
+      });
+
+      pm.test("Confirms the deletion", function () {
+          pm.expect(pm.response.text()).to.match(/deleted/i);
+      });
+    language: text/javascript
+order: 10000

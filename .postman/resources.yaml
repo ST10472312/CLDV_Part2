@@ -1,0 +1,12 @@
+# Use this workspace to collaborate
+workspace:
+  id: 48bc400d-d500-42a0-8e88-e2014b41fa2a
+
+localResources:
+  collections:
+    - ../CLDV_Part2-feature-compose-docs-video/CoffeeNChillFunctions/docs/CoffeeNChill
+      - Part 1
+  environments:
+    - ../CLDV_Part2-feature-compose-docs-video/CoffeeNChillFunctions/docs/CoffeeNChill-Local.postman_environment.json
+    - ../CLDV_Part2-feature-compose-docs-video/CoffeeNChillFunctions/docs/CoffeeNChill
+      Local.environment.yaml

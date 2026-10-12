@@ -1,0 +1,30 @@
+$kind: http-request
+url: "{{baseUrl}}/api/menu/Hot%20Drinks/ZZZ-999"
+method: PUT
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "name": "Espresso",
+      "description": "Double shot, single origin.",
+      "price": 26.5,
+      "isAvailable": false
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 404 Not Found", function () {
+          pm.response.to.have.status(404);
+      });
+
+      pm.test("Says the item was not found", function () {
+          pm.expect(pm.response.text()).to.match(/not found/i);
+      });
+
+      pm.test("Does not create the missing item", function () {
+          pm.expect(pm.response.code).to.not.eql(201);
+      });
+    language: text/javascript
+order: 9000

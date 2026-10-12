@@ -1,0 +1,18 @@
+$kind: collection
+description: |-
+  CoffeeNChill Part 1. 23 requests across three folders.
+
+  Select the CoffeeNChill Local environment before running.
+  The three upload requests read their file from /docs/test-files; re-select it after import if Postman reports the path as missing.
+variables:
+  createdCategory: ""
+  createdCategoryEncoded: ""
+  createdRowKey: ""
+  uploadedFileName: ""
+scripts:
+  - type: http:afterResponse
+    code: |-
+      pm.test("Answered within the 2 second budget", function () {
+          pm.expect(pm.response.responseTime).to.be.below(2000);
+      });
+    language: text/javascript

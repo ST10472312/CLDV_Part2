@@ -1,0 +1,28 @@
+$kind: http-request
+url: "{{baseUrl}}/api/documents/upload?fileName=barista-recipe-sheet.pdf"
+method: POST
+headers:
+  Content-Type: application/pdf
+queryParams:
+  fileName: barista-recipe-sheet.pdf
+body:
+  type: file
+  content:
+    src: docs/test-files/barista-recipe-sheet.pdf
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 201 Created", function () {
+          pm.response.to.have.status(201);
+      });
+
+      pm.test("Confirms the stored file name", function () {
+          pm.expect(pm.response.text()).to.include("barista-recipe-sheet.pdf");
+      });
+
+      pm.test("Saves the file name for the download request", function () {
+          pm.collectionVariables.set("uploadedFileName", "barista-recipe-sheet.pdf");
+          pm.expect(pm.collectionVariables.get("uploadedFileName")).to.not.be.empty;
+      });
+    language: text/javascript
+order: 1000

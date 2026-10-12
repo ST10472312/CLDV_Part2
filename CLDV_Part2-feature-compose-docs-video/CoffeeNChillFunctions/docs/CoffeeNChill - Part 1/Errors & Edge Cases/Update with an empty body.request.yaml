@@ -1,0 +1,20 @@
+$kind: http-request
+url: "{{baseUrl}}/api/menu/Hot%20Drinks/ZZZ-998"
+method: PUT
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: ""
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("The request is rejected", function () {
+          pm.expect(pm.response.code).to.be.at.least(400);
+      });
+
+      pm.test("Is not a silent success", function () {
+          pm.expect(pm.response.code).to.not.eql(200);
+      });
+    language: text/javascript
+order: 5000
