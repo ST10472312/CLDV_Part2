@@ -1,0 +1,376 @@
+{
+  "info": {
+    "_postman_id": "a123dcaa-d17c-46f2-8fb0-53b40b9337dd",
+    "name": "03 Orders - Queue Producers",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "58896937",
+    "_collection_link": "https://go.postman.co/collection/58896937-a123dcaa-d17c-46f2-8fb0-53b40b9337dd?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Queue order - valid",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "   pm.test(\"Status is 202 Accepted\", () => pm.response.to.have.status(202));\r\n   const json = pm.response.json();\r\n   pm.test(\"Response says Queued\", () => pm.expect(json.status).to.eql(\"Queued\"));\r\n   pm.test(\"OrderId returned\", () => pm.expect(json.orderId).to.be.a(\"string\").and.not.empty);\r\n   pm.collectionVariables.set(\"orderId\", json.orderId);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "   {\"OrderId\":\"ORD-2026-8801\",\"CustomerName\":\"Jane Smith\",\"SelectedItemSKUs\":[\"COF-001\",\"PAS-104\"],\"TotalPrice\":65.00,\"OrderTimestamp\":\"2026-10-12T10:15:00Z\"}\r\n",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/orders/queue",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "orders",
+            "queue"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Queue order - server generates id",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 202\", () => pm.response.to.have.status(202));\r\npm.test(\"Server generated an OrderId\", () => {\r\n    pm.expect(pm.response.json().orderId).to.match(/^ORD-\\d{4}-[A-Z0-9]{6}$/);\r\n});\r\npm.collectionVariables.set(\"generatedOrderId\", pm.response.json().orderId);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"CustomerName\":\"Thabo Mokoena\",\"SelectedItemSKUs\":[\"COF-001\"],\"TotalPrice\":28.50}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/orders/queue",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "orders",
+            "queue"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Queue order - burst",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"202\", () => pm.response.to.have.status(202));"
+            ]
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const suffix = Math.floor(1000 + Math.random() * 9000);\r\npm.variables.set(\"burstOrderId\", `ORD-2026-${suffix}`);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "    {\"OrderId\":\"{{burstOrderId}}\",\"CustomerName\":\"Peak Hour Student\",\"SelectedItemSKUs\":[\"COF-001\",\"PAS-104\"],\"TotalPrice\":65.00}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/orders/queue",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "orders",
+            "queue"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Invalid - malformed JSON",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "    pm.test(\"Status is 400 Bad Request\", () => pm.response.to.have.status(400));\r\n    pm.test(\"Error payload explains the problem\", () => {\r\n        pm.expect(pm.response.json().error).to.be.a(\"string\");\r\n    });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "    { \"CustomerName\": ",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/orders/queue",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "orders",
+            "queue"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Invalid - bad OrderId format",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "    pm.test(\"Status is 400 Bad Request\", () => pm.response.to.have.status(400));\r\n    pm.test(\"Error payload explains the problem\", () => {\r\n        pm.expect(pm.response.json().error).to.be.a(\"string\");\r\n    });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "    {\"OrderId\":\"123\",\"CustomerName\":\"Jane\",\"SelectedItemSKUs\":[\"COF-001\"],\"TotalPrice\":10}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/orders/queue",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "orders",
+            "queue"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Invalid - negative price",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "    pm.test(\"Status is 400 Bad Request\", () => pm.response.to.have.status(400));\r\n    pm.test(\"Error payload explains the problem\", () => {\r\n        pm.expect(pm.response.json().error).to.be.a(\"string\");\r\n    });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "    {\"CustomerName\":\"Jane\",\"SelectedItemSKUs\":[\"COF-001\"],\"TotalPrice\":-5}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/orders/queue",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "orders",
+            "queue"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Invalid - bad SKU format",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "    pm.test(\"Status is 400 Bad Request\", () => pm.response.to.have.status(400));\r\n    pm.test(\"Error payload explains the problem\", () => {\r\n        pm.expect(pm.response.json().error).to.be.a(\"string\");\r\n    });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "    {\"CustomerName\":\"Jane\",\"SelectedItemSKUs\":[\"coffee\"],\"TotalPrice\":28.50}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/orders/queue",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "orders",
+            "queue"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Invalid - empty SKU list",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "    pm.test(\"Status is 400 Bad Request\", () => pm.response.to.have.status(400));\r\n    pm.test(\"Error payload explains the problem\", () => {\r\n        pm.expect(pm.response.json().error).to.be.a(\"string\");\r\n    });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "    {\"CustomerName\":\"Jane\",\"SelectedItemSKUs\":[],\"TotalPrice\":28.50}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/orders/queue",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "orders",
+            "queue"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Invalid - missing CustomerName",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "    pm.test(\"Status is 400 Bad Request\", () => pm.response.to.have.status(400));\r\n    pm.test(\"Error payload explains the problem\", () => {\r\n        pm.expect(pm.response.json().error).to.be.a(\"string\");\r\n    });\r\n    pm.test(\"Error mentions CustomerName\", () => {\r\n    pm.expect(\r\n        JSON.stringify(pm.response.json().details)\r\n    ).to.include(\"CustomerName\");\r\n});\r\n"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "    {\"SelectedItemSKUs\":[\"COF-001\"],\"TotalPrice\":28.50}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/orders/queue",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "orders",
+            "queue"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": ""
+    },
+    {
+      "key": "orderId",
+      "value": ""
+    },
+    {
+      "key": "generatedOrderId",
+      "value": ""
+    }
+  ]
+}
