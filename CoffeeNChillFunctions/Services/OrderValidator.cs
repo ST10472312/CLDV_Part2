@@ -18,9 +18,7 @@ namespace CoffeeNChillFunctions.Services
             errors = new List<string>();
             var results = new List<ValidationResult>();
             Validator.TryValidateObject(request, new ValidationContext(request), results, validateAllProperties: true);
-
-            if (!string.IsNullOrWhiteSpace(request.OrderID) && !OrderIdPattern.IsMatch(request.OrderID))
-                errors.AddRange(results.Select(r => r.ErrorMessage ?? "Inavlid value."));
+            errors.AddRange(results.Select(r => r.ErrorMessage ?? "Invalid value."));
 
             if (!string.IsNullOrWhiteSpace(request.OrderID) && !OrderIdPattern.IsMatch(request.OrderID))
                 errors.Add("OrderId must look like ORD-2026-8801.");

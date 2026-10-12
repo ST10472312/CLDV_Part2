@@ -1,0 +1,665 @@
+{
+  "info": {
+    "name": "04 Orders - Processing and Status",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Setup - queue an order",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// ST10472017",
+              "// Postman, 2026. Test examples in Postman. [Online]",
+              "// Available at: https://learning.postman.com/docs/tests-and-scripts/write-scripts/test-examples/",
+              "// [Accessed 12 October 2026].",
+              "// Postman, 2026. Store and reuse values using variables. [Online]",
+              "// Available at: https://learning.postman.com/docs/sending-requests/variables/variables/",
+              "// [Accessed 12 October 2026].",
+              "",
+              "const id = \"ORD-2026-\" + Math.floor(1000 + Math.random() * 9000);",
+              "pm.collectionVariables.set(\"statusOrderId\", id);"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Order accepted\", () => pm.response.to.have.status(202));",
+              "pm.test(\"Response carries the order id\", () =>",
+              "    pm.expect(pm.response.json().orderId).to.eql(pm.collectionVariables.get(\"statusOrderId\")));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/orders/queue",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "orders",
+            "queue"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"OrderId\": \"{{statusOrderId}}\",\n  \"CustomerName\": \"Status Test Student\",\n  \"SelectedItemSKUs\": [\n    \"COF-001\",\n    \"PAS-104\"\n  ],\n  \"TotalPrice\": 65.0\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Get order by id - wait for Received",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "setTimeout(function () {}, 3000);"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Order exists in the Orders table\", () => pm.response.to.have.status(200));",
+              "const order = pm.response.json();",
+              "pm.test(\"OrderId matches\", () =>",
+              "    pm.expect(order.orderId).to.eql(pm.collectionVariables.get(\"statusOrderId\")));",
+              "pm.test(\"Status is a valid lifecycle value\", () =>",
+              "    pm.expect([\"Received\", \"Preparing\", \"Ready\", \"Collected\"]).to.include(order.status));",
+              "pm.test(\"Orders row carries the customer and items\", () => {",
+              "    pm.expect(order.customerName).to.eql(\"Status Test Student\");",
+              "    pm.expect(order.selectedItemSKUs).to.have.lengthOf(2);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/orders/{{statusOrderId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "orders",
+            "{{statusOrderId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Manual takeover - set Preparing",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status updated\", () => pm.response.to.have.status(200));",
+              "pm.test(\"New status returned\", () => pm.expect(pm.response.json().status).to.eql(\"Preparing\"));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/orders/status",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "orders",
+            "status"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"OrderId\": \"{{statusOrderId}}\",\n  \"Status\": \"Preparing\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Manual takeover - set Ready",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status updated\", () => pm.response.to.have.status(200));",
+              "pm.test(\"New status returned\", () => pm.expect(pm.response.json().status).to.eql(\"Ready\"));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/orders/status",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "orders",
+            "status"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"OrderId\": \"{{statusOrderId}}\",\n  \"Status\": \"Ready\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Manual takeover - set Collected",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status updated\", () => pm.response.to.have.status(200));",
+              "pm.test(\"New status returned\", () => pm.expect(pm.response.json().status).to.eql(\"Collected\"));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/orders/status",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "orders",
+            "status"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"OrderId\": \"{{statusOrderId}}\",\n  \"Status\": \"Collected\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Get all orders",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Contains our order\", () => {",
+              "    const ids = pm.response.json().map(o => o.orderId);",
+              "    pm.expect(ids).to.include(pm.collectionVariables.get(\"statusOrderId\"));",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/orders",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "orders"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get orders filtered by status",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Every row matches the filter\", () =>",
+              "    pm.response.json().forEach(o => pm.expect(o.status).to.eql(\"Collected\")));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/orders?status=Collected",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "orders"
+          ],
+          "query": [
+            {
+              "key": "status",
+              "value": "Collected"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get unknown order",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Expected 404\", () => pm.response.to.have.status(404));",
+              "pm.test(\"Error explains the miss\", () => pm.expect(pm.response.json().error).to.be.a(\"string\"));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/orders/ORD-0000-NOPE",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "orders",
+            "ORD-0000-NOPE"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Invalid status value",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Expected 400\", () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/orders/status",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "orders",
+            "status"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"OrderId\": \"{{statusOrderId}}\",\n  \"Status\": \"Banana\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Invalid transition - back to Received",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Expected 409\", () => pm.response.to.have.status(409));",
+              "pm.test(\"Error names the transition rule\", () =>",
+              "    pm.expect(pm.response.json().error).to.include(\"Invalid transition\"));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/orders/status",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "orders",
+            "status"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"OrderId\": \"{{statusOrderId}}\",\n  \"Status\": \"Received\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Update unknown order",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Expected 404\", () => pm.response.to.have.status(404));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/orders/status",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "orders",
+            "status"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"OrderId\": \"ORD-0000-NOPE\",\n  \"Status\": \"Preparing\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Automatic lifecycle - queue order",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.collectionVariables.set(\"autoOrderId\", \"ORD-2026-\" + Math.floor(1000 + Math.random() * 9000));"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Order accepted\", () => pm.response.to.have.status(202));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/orders/queue",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "orders",
+            "queue"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"OrderId\": \"{{autoOrderId}}\",\n  \"CustomerName\": \"Auto Lifecycle Student\",\n  \"SelectedItemSKUs\": [\n    \"COF-001\"\n  ],\n  \"TotalPrice\": 28.5\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Automatic lifecycle - wait then check Collected",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "setTimeout(function () {}, 28000);"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Order reached Collected automatically\", () =>",
+              "    pm.expect(pm.response.json().status).to.eql(\"Collected\"));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/orders/{{autoOrderId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "orders",
+            "{{autoOrderId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Poison - queue failing order",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.collectionVariables.set(\"poisonOrderId\", \"ORD-2026-\" + Math.floor(1000 + Math.random() * 9000));"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Order accepted\", () => pm.response.to.have.status(202));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/orders/queue",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "orders",
+            "queue"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"OrderId\": \"{{poisonOrderId}}\",\n  \"CustomerName\": \"POISON-TEST\",\n  \"SelectedItemSKUs\": [\n    \"COF-001\"\n  ],\n  \"TotalPrice\": 28.5\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Poison - order recorded as Failed",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "setTimeout(function () {}, 20000);"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Poison order recorded\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Status is Failed\", () => pm.expect(pm.response.json().status).to.eql(\"Failed\"));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/orders/{{poisonOrderId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "orders",
+            "{{poisonOrderId}}"
+          ]
+        }
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:7071/api"
+    },
+    {
+      "key": "statusOrderId",
+      "value": ""
+    },
+    {
+      "key": "autoOrderId",
+      "value": ""
+    },
+    {
+      "key": "poisonOrderId",
+      "value": ""
+    }
+  ]
+}
