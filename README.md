@@ -45,6 +45,53 @@ and the poison queue.
 ```bash
 newman run docs/wip/member2_orders_processing.postman_collection.json \
   -e docs/wip/member2_orders.postman_environment.json
+
+## Member 3 — Docker Compose, Docker Hub & Documentation
+
+### Docker Compose
+
+The project uses `docker-compose.yml` to run the CoffeeNChill application services together. The configuration uses Docker Hub images for the Azure Functions application and Azurite storage emulator, connected through a Docker bridge network with persistent storage configured for the required data.
+
+Start the services from the repository root:
+
+```bash
+docker compose up -d
+```
+
+Check the running containers:
+
+```bash
+docker compose ps
+```
+
+Stop the services:
+
+```bash
+docker compose down
+```
+
+### Docker Hub Images
+
+The project images are published to Docker Hub:
+
+- **Functions image:** `coffeenchill-functions`
+- **Azurite image:** `coffeenchill-azurite`
+
+The repositories include version tags `v1.0` and `v2.0` for the relevant images.
+
+### Verification
+
+The Docker Compose configuration was checked using:
+
+```bash
+docker compose config --quiet
+```
+
+The services were started and checked for healthy operation. The Postman tests were also run to verify the API functionality.
+
+### Contribution
+
+Member 3 was responsible for the Docker Compose configuration, Docker Hub image publishing and versioning, and supporting project documentation for deployment and execution.
 ```
 
 The run takes about 50 seconds: two requests wait for the simulated lifecycle and for
