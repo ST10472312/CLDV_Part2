@@ -105,7 +105,13 @@ The following results were verified:
 - The application exposed its HTTP endpoints through port `7071`.
 - The available API endpoints were identified from the Functions host logs for testing through Postman.
 
-### Member 3 Contribution
+### YouTube Demonstration
+
+The project demonstration video showcases the Docker Compose configuration, container verification, CoffeeNChill API testing, Docker Hub images and documentation.
+
+**Video link:** https://youtu.be/xNaX68Y-rVY
+
+#### Member 3 Contribution
 
 Member 3 was responsible for configuring Docker Compose, integrating the Azure Functions application with the Azurite storage emulator, configuring the Docker network and persistent storage, publishing and versioning the Docker Hub images, verifying container startup and documenting the deployment and execution procedures.
   -e docs/wip/member2_orders.postman_environment.json
